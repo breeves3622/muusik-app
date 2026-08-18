@@ -1,7 +1,7 @@
 {
     "client_id": 1539295351675162745,
     "client_secret": "YOUR_DISCORD_CLIENT_SECRET",
-    "redirect_uri": "http://YOUR_SERVER_IP:8080/auth/callback",
+    "redirect_uri": "http://YOUR_SERVER_IP:8880/auth/callback",
     "secret_key": "generate_a_random_secret_key_here",
     "bot_api_url": "http://vocard-bot:5000",
     "port": 8080

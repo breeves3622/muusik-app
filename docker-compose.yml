@@ -57,7 +57,7 @@ services:
     image: ghcr.io/chocomeow/vocard-dashboard:latest
     restart: unless-stopped
     ports:
-      - "${DASHBOARD_PORT:-8080}:8080"
+      - "${DASHBOARD_PORT:-8880}:8080"
     volumes:
       - ./dashboard/settings.json:/app/settings.json
     networks:
