@@ -44,6 +44,10 @@ services:
     container_name: vocard-bot
     image: ghcr.io/chocomeow/vocard:latest
     restart: unless-stopped
+    environment:
+      - TOKEN=${DISCORD_BOT_TOKEN}
+      - CLIENT_ID=${DISCORD_CLIENT_ID:-1539295351675162745}
+      - CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
     volumes:
       - ./vocard/settings.json:/app/settings.json
     networks:
@@ -56,6 +60,9 @@ services:
     container_name: vocard-dashboard
     image: ghcr.io/chocomeow/vocard-dashboard:latest
     restart: unless-stopped
+    environment:
+      - CLIENT_ID=${DISCORD_CLIENT_ID:-1539295351675162745}
+      - CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
     ports:
       - "${DASHBOARD_PORT:-8880}:8080"
     volumes:
