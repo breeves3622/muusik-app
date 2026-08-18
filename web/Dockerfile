@@ -20,7 +20,7 @@ ENV PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY:-placeholder-anon-key}
 ENV PRIVATE_SUPABASE_SERVICE_ROLE=${PRIVATE_SUPABASE_SERVICE_ROLE:-placeholder-service-role}
 
 # Ensure .env exists with default fallback values during vite build
-RUN cp .env.example .env 2>/dev/null || echo -e "PUBLIC_SUPABASE_URL=https://placeholder.supabase.co\nPUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key\nPRIVATE_SUPABASE_SERVICE_ROLE=placeholder-service-role" > .env
+RUN cp .env.example .env 2>/dev/null || printf "PUBLIC_SUPABASE_URL=https://placeholder.supabase.co\nPUBLIC_SUPABASE_ANON_KEY=placeholder-anon-key\nPRIVATE_SUPABASE_SERVICE_ROLE=placeholder-service-role\n" > .env
 
 RUN npm run build
 
