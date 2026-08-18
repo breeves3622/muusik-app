@@ -60,20 +60,35 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 });
 
 client.on('ready', async () => {
-    console.log(`[Bot Ready] Logged in as ${client.user?.tag} (${client.user?.id})`);
+    console.log(`[Bot Ready] Logged in as ${client.user?.tag} (ID: ${client.user?.id})`);
     console.log(player.scanDeps());
     setOnlineSince(Date.now());
 
     try {
-        if (process.env.TOKEN && process.env.CLIENT_ID) {
+        const appId = client.user?.id || process.env.CLIENT_ID;
+        if (process.env.TOKEN && appId) {
             const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
             const commandsData = JSON.parse(
                 await fs.promises.readFile(path.join(process.cwd(), 'commands.json'), 'utf-8'),
             );
-            await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+            
+            // 1. Register global commands
+            await rest.put(Routes.applicationCommands(appId), {
                 body: commandsData,
             });
-            console.log('Successfully auto-registered application (/) commands with Discord.');
+            console.log('Successfully registered global application (/) commands.');
+
+            // 2. Register instant guild commands for all currently joined guilds (bypasses 1-hour Discord global cache delay)
+            for (const guild of Array.from(client.guilds.cache.values())) {
+                try {
+                    await rest.put(Routes.applicationGuildCommands(appId, guild.id), {
+                        body: commandsData,
+                    });
+                    console.log(`Successfully registered INSTANT slash commands for guild: ${guild.name} (${guild.id})`);
+                } catch (gErr) {
+                    console.error(`Failed registering instant guild commands for ${guild.name}:`, gErr);
+                }
+            }
         }
     } catch (cmdError) {
         console.error('Error auto-registering application commands:', cmdError);
@@ -100,6 +115,24 @@ client.on('ready', async () => {
                 },
             },
         );
+    }
+});
+
+client.on('guildCreate', async (guild) => {
+    try {
+        const appId = client.user?.id || process.env.CLIENT_ID;
+        if (appId && process.env.TOKEN) {
+            const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+            const commandsData = JSON.parse(
+                await fs.promises.readFile(path.join(process.cwd(), 'commands.json'), 'utf-8'),
+            );
+            await rest.put(Routes.applicationGuildCommands(appId, guild.id), {
+                body: commandsData,
+            });
+            console.log(`Registered instant guild commands on join for guild: ${guild.name}`);
+        }
+    } catch (e) {
+        console.error('Error registering commands on guild join:', e);
     }
 });
 
