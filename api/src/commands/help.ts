@@ -12,47 +12,50 @@ import * as path from 'path';
 const ITEMS_PER_PAGE = 8;
 
 export default async (interaction: CommandInteraction) => {
-    if (interaction.commandName === 'help') {
-        const commandsFilePath = path.join(process.cwd(), 'commands.json');
-        const commands: Command[] = JSON.parse(
-            fs.readFileSync(commandsFilePath, 'utf8'),
-        );
+    const commandsFilePath = path.join(process.cwd(), 'commands.json');
+    const commands: Command[] = JSON.parse(
+        fs.readFileSync(commandsFilePath, 'utf8'),
+    );
 
-        const totalPages = Math.ceil(commands.length / ITEMS_PER_PAGE);
+    const totalPages = Math.ceil(commands.length / ITEMS_PER_PAGE);
 
-        const fields = commands
-            .slice(0, ITEMS_PER_PAGE)
-            .map((cmd: Command) => ({
-                name: `/${cmd.name}`,
-                value: cmd.description,
-            }));
+    const fields = commands
+        .slice(0, ITEMS_PER_PAGE)
+        .map((cmd: Command) => ({
+            name: `/${cmd.name}`,
+            value: cmd.description,
+        }));
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId('previous_page')
-                .setLabel('Previous')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(true),
-            new ButtonBuilder()
-                .setCustomId('next_page')
-                .setLabel('Next')
-                .setStyle(ButtonStyle.Primary)
-                .setDisabled(totalPages <= 1),
-        );
+    const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setCustomId('previous_page')
+            .setLabel('Previous')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(true),
+        new ButtonBuilder()
+            .setCustomId('next_page')
+            .setLabel('Next')
+            .setStyle(ButtonStyle.Primary)
+            .setDisabled(totalPages <= 1),
+    );
 
-        await interaction.reply({
-            embeds: [
-                {
-                    title: `muusik.app Commands`,
-                    description: `Here are the commands you can use with the muusik.app bot:`,
-                    color: colors.Muusik,
-                    fields: fields,
-                    footer: { text: `Page 1 of ${totalPages}` },
-                },
-            ],
-            components: [row],
-            ephemeral: true,
-        });
+    const payload = {
+        embeds: [
+            {
+                title: `muusik.app Commands`,
+                description: `Here are the commands you can use with the muusik.app bot:`,
+                color: colors.Muusik,
+                fields: fields,
+                footer: { text: `Page 1 of ${totalPages}` },
+            },
+        ],
+        components: [row],
+    };
+
+    if (interaction.deferred || interaction.replied) {
+        await interaction.editReply(payload);
+    } else {
+        await interaction.reply({ ...payload, ephemeral: true });
     }
 };
 
