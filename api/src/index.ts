@@ -60,6 +60,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 });
 
 client.on('ready', async () => {
+    console.log(`[Bot Ready] Logged in as ${client.user?.tag} (${client.user?.id})`);
     console.log(player.scanDeps());
     setOnlineSince(Date.now());
 
@@ -103,8 +104,12 @@ client.on('ready', async () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
-    console.log(`[DEBUG] Raw interaction received: type=${interaction.type}, isCommand=${interaction.isCommand()}`);
-    await interactionManager.handleInteraction(interaction);
+    console.log(`[DEBUG index.ts] Raw interaction event received! ID: ${interaction.id}, Type: ${interaction.type}`);
+    try {
+        await interactionManager.handleInteraction(interaction);
+    } catch (err) {
+        console.error('[CRITICAL ERROR in interactionCreate]:', err);
+    }
 });
 
 const token = process.env.TOKEN;

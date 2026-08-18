@@ -35,6 +35,7 @@ const commandMap: Record<string, keyof typeof CommandHandlers> = {
 export default {
     handleInteraction: async (interaction: Interaction) => {
         try {
+            console.log(`[DEBUG interactionManager] Handling interaction: type=${interaction.type}`);
             if (interaction.isChatInputCommand() || interaction.isCommand()) {
                 const commandInteraction = interaction as ChatInputCommandInteraction;
                 const { commandName } = commandInteraction;
@@ -51,7 +52,9 @@ export default {
                 const handler = CommandHandlers[handlerName] as ((i: ChatInputCommandInteraction) => Promise<void>) | undefined;
 
                 if (handler) {
+                    console.log(`[Interaction] Executing handler for /${commandName}`);
                     await handler(commandInteraction);
+                    console.log(`[Interaction] Finished executing /${commandName}`);
                 } else {
                     console.log(`No handler found for command: ${commandName}`);
                     const errorEmbed = new EmbedBuilder()
@@ -101,7 +104,7 @@ export default {
                 }
             }
         } catch (error) {
-            console.error('Error handling interaction:', error);
+            console.error('[CRITICAL ERROR in interactionManager]:', error);
         }
     },
 };
