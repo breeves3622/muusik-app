@@ -6,7 +6,6 @@ import {
     StringSelectMenuInteraction,
     VoiceBasedChannel,
     EmbedBuilder,
-    Embed,
 } from 'discord.js';
 import { player } from '..';
 import { default as fetchSongNamesFromLastFM } from '../utils/fetchSongNamesFromLastFM';
@@ -29,29 +28,101 @@ export default async (interaction: CommandInteraction) => {
             return interaction.reply({ embeds: [embed], ephemeral: true });
         }
 
+        // Immediately defer reply to avoid Discord interaction timeout ("The application did not respond")
+        await interaction.deferReply({ ephemeral: true });
+
+        const member = interaction.member as GuildMember;
+        const voiceChannel = member?.voice?.channel as VoiceBasedChannel;
+
+        if (!voiceChannel) {
+            const embed = new EmbedBuilder()
+                .setColor(colors.Error)
+                .setDescription('You need to be in a voice channel to play music!');
+            return interaction.editReply({ embeds: [embed] });
+        }
+
+        // Direct URL or playlist
         if (
-            query.includes('spotify') ||
-            query.startsWith(
-                `http${process.env.DEV ? '://localhost:5173' : 's://muusik.app'}/playlist/`,
-            )
+            query.startsWith('http://') ||
+            query.startsWith('https://') ||
+            query.includes('spotify.com') ||
+            query.includes('youtube.com') ||
+            query.includes('youtu.be') ||
+            query.includes('soundcloud.com')
         ) {
-            await handlePlaylist(interaction, query);
+            if (
+                query.includes('spotify.com/playlist') ||
+                query.startsWith(
+                    `http${process.env.DEV ? '://localhost:5173' : 's://muusik.app'}/playlist/`,
+                )
+            ) {
+                await handlePlaylist(interaction, query, voiceChannel);
+            } else {
+                try {
+                    const embed = new EmbedBuilder()
+                        .setColor(colors.Muusik)
+                        .setDescription(`Loading: **${query}**`);
+                    await interaction.editReply({ embeds: [embed] });
+
+                    await player.play(voiceChannel, query, {
+                        requestedBy: interaction.user.id,
+                    });
+                } catch (error) {
+                    console.error('Error playing direct link:', error);
+                    const errorEmbed = new EmbedBuilder()
+                        .setColor(colors.Error)
+                        .setDescription('Failed to play the requested track/URL.');
+                    await interaction.followUp({ embeds: [errorEmbed], ephemeral: true });
+                }
+            }
         } else {
+            // Text search
             const songs = await fetchSongNamesFromLastFM(query);
+
+            if (!songs || songs.length === 0) {
+                try {
+                    const embed = new EmbedBuilder()
+                        .setColor(colors.Muusik)
+                        .setDescription(`Searching and playing: **${query}**`);
+                    await interaction.editReply({ embeds: [embed] });
+
+                    await player.play(voiceChannel, query, {
+                        requestedBy: interaction.user.id,
+                    });
+                } catch (err) {
+                    const errorEmbed = new EmbedBuilder()
+                        .setColor(colors.Error)
+                        .setDescription(`No playable tracks found for **${query}**.`);
+                    await interaction.editReply({ embeds: [errorEmbed] });
+                }
+                return;
+            }
 
             const options = songs
                 .slice(0, 25)
-                .map((song) => {
-                    return {
-                        label: song.name,
-                        description: song.artist,
-                        value: song.url.replace(
-                            'https://www.last.fm/music/',
-                            '',
-                        ) as string,
-                    };
-                })
+                .map((song) => ({
+                    label: song.name,
+                    description: song.artist,
+                    value: song.url.replace(
+                        'https://www.last.fm/music/',
+                        '',
+                    ) as string,
+                }))
                 .filter((song) => song.value.length < 100);
+
+            if (options.length === 0) {
+                try {
+                    await player.play(voiceChannel, query, {
+                        requestedBy: interaction.user.id,
+                    });
+                } catch (err) {
+                    const errorEmbed = new EmbedBuilder()
+                        .setColor(colors.Error)
+                        .setDescription(`No playable tracks found for **${query}**.`);
+                    await interaction.editReply({ embeds: [errorEmbed] });
+                }
+                return;
+            }
 
             const selectMenu = new StringSelectMenuBuilder()
                 .setCustomId('select-song')
@@ -67,10 +138,9 @@ export default async (interaction: CommandInteraction) => {
                 .setColor(colors.Muusik)
                 .setDescription('Choose a song from the list:');
 
-            await interaction.reply({
+            await interaction.editReply({
                 embeds: [embed],
                 components: [row],
-                ephemeral: true,
             });
         }
     }
@@ -116,7 +186,7 @@ export async function handleSelectMenuInteraction(
 
         try {
             const member = interaction.member as GuildMember;
-            const voiceChannel = member.voice.channel as VoiceBasedChannel;
+            const voiceChannel = member?.voice?.channel as VoiceBasedChannel;
 
             if (!voiceChannel) {
                 const embed = new EmbedBuilder()
@@ -162,17 +232,8 @@ export async function handleSelectMenuInteraction(
 async function handlePlaylist(
     interaction: CommandInteraction,
     playlistUrl: string,
+    voiceChannel: VoiceBasedChannel,
 ) {
-    const member = interaction.member as GuildMember;
-    const voiceChannel = member.voice.channel as VoiceBasedChannel;
-
-    if (!voiceChannel) {
-        const embed = new EmbedBuilder()
-            .setColor(colors.Muusik)
-            .setDescription('You need to be in a voice channel to play music!');
-        return interaction.reply({ embeds: [embed], ephemeral: true });
-    }
-
     const skippedTracks = [];
 
     try {
@@ -188,7 +249,7 @@ async function handlePlaylist(
                 .setColor(colors.Muusik)
                 .setDescription(`Playing muusik playlist: ${playlistUrl}`);
 
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.editReply({ embeds: [embed] });
 
             for (const track of tracks) {
                 try {
@@ -207,7 +268,7 @@ async function handlePlaylist(
                 .setColor(colors.Muusik)
                 .setDescription(`Playing Spotify playlist: ${playlistUrl}`);
 
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.editReply({ embeds: [embed] });
             try {
                 await player.play(voiceChannel, playlistUrl, {
                     requestedBy: interaction.user.id,
@@ -228,7 +289,7 @@ async function handlePlaylist(
             const embed = new EmbedBuilder()
                 .setColor(colors.Error)
                 .setDescription(`Invalid playlist URL: ${playlistUrl}`);
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.editReply({ embeds: [embed] });
         }
 
         if (skippedTracks.length > 0) {

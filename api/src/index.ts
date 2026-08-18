@@ -58,9 +58,27 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
     }
 });
 
+import fs from 'node:fs';
+import path from 'node:path';
+
 client.on('ready', async () => {
     console.log(player.scanDeps());
     onlineSince = Date.now();
+
+    try {
+        if (process.env.TOKEN && process.env.CLIENT_ID) {
+            const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+            const commandsData = JSON.parse(
+                await fs.promises.readFile(path.join(process.cwd(), 'commands.json'), 'utf-8'),
+            );
+            await rest.put(Routes.applicationCommands(process.env.CLIENT_ID), {
+                body: commandsData,
+            });
+            console.log('Successfully auto-registered application (/) commands with Discord.');
+        }
+    } catch (cmdError) {
+        console.error('Error auto-registering application commands:', cmdError);
+    }
 
     client.user?.setPresence({
         activities: [
