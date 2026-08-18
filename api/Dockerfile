@@ -3,7 +3,6 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Ensure devDependencies (typescript, discord.js, etc.) are installed even if NODE_ENV is set to production
 ENV NODE_ENV=development
 
 # Install build dependencies required for native audio modules & ffmpeg
@@ -13,6 +12,10 @@ COPY package*.json ./
 RUN npm ci --include=dev
 
 COPY . .
+
+# Ensure .env exists during build phase
+RUN cp .env.example .env 2>/dev/null || touch .env
+
 RUN npm run build
 
 # Production Runner stage
