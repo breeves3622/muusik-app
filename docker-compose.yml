@@ -1,7 +1,5 @@
 version: '3.8'
 
-name: vocard
-
 services:
   lavalink:
     container_name: vocard-lavalink
@@ -13,17 +11,10 @@ services:
       - LAVALINK_SERVER_PASSWORD=${LAVALINK_PASSWORD:-youshallnotpass}
     volumes:
       - ./lavalink/application.yml:/opt/Lavalink/application.yml
-      - ./lavalink/plugins:/opt/Lavalink/plugins
     networks:
       - vocard
     ports:
-      - "2333:2333"
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:2333/version || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      - "${LAVALINK_PORT:-2333}:2333"
 
   spotify-tokener:
     image: ghcr.io/topi314/spotify-tokener:master
@@ -34,7 +25,7 @@ services:
     networks:
       - vocard
     ports:
-      - "49152:49152"
+      - "${SPOTIFY_TOKENER_PORT:-49152}:49152"
 
   vocard-db:
     container_name: vocard-db
@@ -48,13 +39,6 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS:-adminpassword123}
     networks:
       - vocard
-    command: ["mongod", "--oplogSize=1024", "--wiredTigerCacheSizeGB=1", "--auth"]
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
 
   vocard:
     container_name: vocard-bot
@@ -65,17 +49,15 @@ services:
     networks:
       - vocard
     depends_on:
-      lavalink:
-        condition: service_healthy
-      vocard-db:
-        condition: service_healthy
+      - lavalink
+      - vocard-db
 
   vocard-dashboard:
     container_name: vocard-dashboard
     image: ghcr.io/chocomeow/vocard-dashboard:latest
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "${DASHBOARD_PORT:-8080}:8080"
     volumes:
       - ./dashboard/settings.json:/app/settings.json
     networks:
@@ -85,4 +67,4 @@ services:
 
 networks:
   vocard:
-    name: vocard
+    driver: bridge
