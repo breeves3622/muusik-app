@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  muusik-api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: muusik-api
+    restart: always
+    ports:
+      - "${API_PORT:-8000}:8000"
+    environment:
+      - TOKEN=${DISCORD_BOT_TOKEN}
+      - CLIENT_ID=${DISCORD_CLIENT_ID}
+      - PORT=8000
+      - FRONTEND_ORIGIN=${FRONTEND_ORIGIN:-http://localhost:5173}
+      - TOPGG_TOKEN=${TOPGG_TOKEN:-}
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8000/session-type || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  muusik-web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
+        PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+    container_name: muusik-web
+    restart: always
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    environment:
+      - PORT=5173
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
+      - PRIVATE_SUPABASE_SERVICE_ROLE=${PRIVATE_SUPABASE_SERVICE_ROLE}
+      - HOST=0.0.0.0
+    depends_on:
+      - muusik-api
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5173/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
