@@ -3,8 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Ensure devDependencies (vite, svelte-kit, adapters) are installed even if NODE_ENV is set to production
+ENV NODE_ENV=development
+
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci --include=dev --legacy-peer-deps
 
 COPY . .
 
@@ -25,7 +28,7 @@ ENV NODE_ENV=production
 ENV PORT=5173
 
 COPY package*.json ./
-RUN npm ci --omit=dev --legacy-peer-deps
+RUN npm ci --legacy-peer-deps
 
 COPY --from=builder /app/build ./build
 

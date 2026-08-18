@@ -3,11 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Ensure devDependencies (typescript, discord.js, etc.) are installed even if NODE_ENV is set to production
+ENV NODE_ENV=development
+
 # Install build dependencies required for native audio modules & ffmpeg
 RUN apk add --no-cache python3 make g++ git ffmpeg
 
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
 COPY . .
 RUN npm run build
@@ -24,8 +27,8 @@ ENV NODE_ENV=production
 ENV PORT=8000
 
 COPY package*.json ./
-# Keep full dependencies as discord.js and discord-player are in devDependencies
-RUN npm ci
+# Install dependencies (discord.js & discord-player are in devDependencies in api/package.json)
+RUN npm ci --include=dev
 
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/scripts ./scripts
