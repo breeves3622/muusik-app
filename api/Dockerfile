@@ -24,12 +24,13 @@ ENV NODE_ENV=production
 ENV PORT=8000
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+# Keep full dependencies as discord.js and discord-player are in devDependencies
+RUN npm ci
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/build ./build
 COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/commands.json ./commands.json
 
 EXPOSE 8000
 
-CMD ["node", "dist/index.js"]
+CMD ["node", "build/index.js"]
