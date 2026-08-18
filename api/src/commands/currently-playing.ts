@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 import { player } from '../instance';
 import { colors } from '../types';
+import { sendReply } from '../utils/sendReply';
 
 export default async (interaction: CommandInteraction) => {
     if (interaction.commandName === 'currentlyplaying') {
@@ -18,7 +19,7 @@ export default async (interaction: CommandInteraction) => {
                 .setDescription(
                     "You need to be in a voice channel to see what's playing!",
                 );
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return sendReply(interaction, { embeds: [embed], ephemeral: true });
         }
 
         const node = player.nodes.get(voiceChannel.guild.id);
@@ -29,7 +30,7 @@ export default async (interaction: CommandInteraction) => {
                 .setDescription(
                     'No music is currently playing in this server.',
                 );
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return sendReply(interaction, { embeds: [embed], ephemeral: true });
         }
 
         const progressBar = createProgressBar(
@@ -44,7 +45,7 @@ export default async (interaction: CommandInteraction) => {
             )
             .setColor(colors.Muusik);
 
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        await sendReply(interaction, { embeds: [embed], ephemeral: true });
     }
 };
 

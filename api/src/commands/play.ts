@@ -12,6 +12,7 @@ import { default as fetchSongNamesFromLastFM } from '../utils/fetchSongNamesFrom
 import { default as playlinks } from '../utils/fetchPlaylinks';
 import axios from 'axios';
 import { colors } from '../types';
+import { sendReply } from '../utils/sendReply';
 
 function spacesToPlus(str: string) {
     return str.replace(/ /g, '+');
@@ -25,11 +26,8 @@ export default async (interaction: CommandInteraction) => {
             const embed = new EmbedBuilder()
                 .setColor(colors.Error)
                 .setDescription('Please provide a search query.');
-            return interaction.reply({ embeds: [embed], ephemeral: true });
+            return sendReply(interaction, { embeds: [embed], ephemeral: true });
         }
-
-        // Immediately defer reply to avoid Discord interaction timeout ("The application did not respond")
-        await interaction.deferReply({ ephemeral: true });
 
         const member = interaction.member as GuildMember;
         const voiceChannel = member?.voice?.channel as VoiceBasedChannel;
@@ -38,7 +36,7 @@ export default async (interaction: CommandInteraction) => {
             const embed = new EmbedBuilder()
                 .setColor(colors.Error)
                 .setDescription('You need to be in a voice channel to play music!');
-            return interaction.editReply({ embeds: [embed] });
+            return sendReply(interaction, { embeds: [embed] });
         }
 
         // Direct URL or playlist
@@ -62,7 +60,7 @@ export default async (interaction: CommandInteraction) => {
                     const embed = new EmbedBuilder()
                         .setColor(colors.Muusik)
                         .setDescription(`Loading: **${query}**`);
-                    await interaction.editReply({ embeds: [embed] });
+                    await sendReply(interaction, { embeds: [embed] });
 
                     await player.play(voiceChannel, query, {
                         requestedBy: interaction.user.id,
@@ -84,7 +82,7 @@ export default async (interaction: CommandInteraction) => {
                     const embed = new EmbedBuilder()
                         .setColor(colors.Muusik)
                         .setDescription(`Searching and playing: **${query}**`);
-                    await interaction.editReply({ embeds: [embed] });
+                    await sendReply(interaction, { embeds: [embed] });
 
                     await player.play(voiceChannel, query, {
                         requestedBy: interaction.user.id,
@@ -93,7 +91,7 @@ export default async (interaction: CommandInteraction) => {
                     const errorEmbed = new EmbedBuilder()
                         .setColor(colors.Error)
                         .setDescription(`No playable tracks found for **${query}**.`);
-                    await interaction.editReply({ embeds: [errorEmbed] });
+                    await sendReply(interaction, { embeds: [errorEmbed] });
                 }
                 return;
             }
@@ -119,7 +117,7 @@ export default async (interaction: CommandInteraction) => {
                     const errorEmbed = new EmbedBuilder()
                         .setColor(colors.Error)
                         .setDescription(`No playable tracks found for **${query}**.`);
-                    await interaction.editReply({ embeds: [errorEmbed] });
+                    await sendReply(interaction, { embeds: [errorEmbed] });
                 }
                 return;
             }
@@ -138,7 +136,7 @@ export default async (interaction: CommandInteraction) => {
                 .setColor(colors.Muusik)
                 .setDescription('Choose a song from the list:');
 
-            await interaction.editReply({
+            await sendReply(interaction, {
                 embeds: [embed],
                 components: [row],
             });
@@ -249,7 +247,7 @@ async function handlePlaylist(
                 .setColor(colors.Muusik)
                 .setDescription(`Playing muusik playlist: ${playlistUrl}`);
 
-            await interaction.editReply({ embeds: [embed] });
+            await sendReply(interaction, { embeds: [embed] });
 
             for (const track of tracks) {
                 try {
@@ -268,7 +266,7 @@ async function handlePlaylist(
                 .setColor(colors.Muusik)
                 .setDescription(`Playing Spotify playlist: ${playlistUrl}`);
 
-            await interaction.editReply({ embeds: [embed] });
+            await sendReply(interaction, { embeds: [embed] });
             try {
                 await player.play(voiceChannel, playlistUrl, {
                     requestedBy: interaction.user.id,
@@ -289,7 +287,7 @@ async function handlePlaylist(
             const embed = new EmbedBuilder()
                 .setColor(colors.Error)
                 .setDescription(`Invalid playlist URL: ${playlistUrl}`);
-            await interaction.editReply({ embeds: [embed] });
+            await sendReply(interaction, { embeds: [embed] });
         }
 
         if (skippedTracks.length > 0) {
@@ -308,6 +306,6 @@ async function handlePlaylist(
         const errorEmbed = new EmbedBuilder()
             .setColor(colors.Error)
             .setDescription('There was an error processing the playlist.');
-        await interaction.editReply({ embeds: [errorEmbed] });
+        await sendReply(interaction, { embeds: [errorEmbed] });
     }
 }
