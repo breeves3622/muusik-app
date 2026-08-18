@@ -27,17 +27,17 @@ services:
       context: ./web
       dockerfile: Dockerfile
       args:
-        PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL}
-        PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY}
+        PUBLIC_SUPABASE_URL: ${PUBLIC_SUPABASE_URL:-https://placeholder.supabase.co}
+        PUBLIC_SUPABASE_ANON_KEY: ${PUBLIC_SUPABASE_ANON_KEY:-placeholder-anon-key}
     container_name: muusik-web
     restart: always
     ports:
       - "${WEB_PORT:-5173}:5173"
     environment:
       - PORT=5173
-      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
-      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
-      - PRIVATE_SUPABASE_SERVICE_ROLE=${PRIVATE_SUPABASE_SERVICE_ROLE}
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL:-https://placeholder.supabase.co}
+      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY:-placeholder-anon-key}
+      - PRIVATE_SUPABASE_SERVICE_ROLE=${PRIVATE_SUPABASE_SERVICE_ROLE:-}
       - HOST=0.0.0.0
     depends_on:
       - muusik-api
