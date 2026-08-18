@@ -1,49 +1,52 @@
-import { CommandInteraction, version } from 'discord.js';
+import { CommandInteraction, EmbedBuilder, version } from 'discord.js';
 import { client, onlineSince, voiceStates } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {
-    const embed = {
-        title: `Muusik Stats`,
-        description: `Statistics regarding the official bot for [muusik.app](https://muusik.app)`,
-        color: colors.Muusik,
-        fields: [
-            {
-                name: `Engines`,
-                value: `Node.JS (API): ${process.version}\n@discord.js: v${version}`,
-                inline: true,
-            },
-            {
-                name: `Avg. Heartbeat`,
-                value: String(client.ws.ping),
-                inline: true,
-            },
-            {
-                name: `Shards`,
-                value: String(client.shard?.count || 1),
-                inline: true,
-            },
-            {
-                name: `Went online`,
-                value: `<t:${Math.floor(onlineSince / 1000)}:R>`,
-                inline: true,
-            },
-            {
-                name: 'Servers',
-                value: String(client.guilds.cache.size),
-                inline: true,
-            },
-            {
-                name: 'Users watching',
-                value: voiceStates.size.toString(),
-                inline: true,
-            },
-        ],
-    };
+    try {
+        const embed = new EmbedBuilder()
+            .setTitle('Muusik Stats')
+            .setDescription(`Statistics regarding the official bot for [muusik.app](https://muusik.app)`)
+            .setColor(colors.Muusik)
+            .addFields(
+                {
+                    name: 'Engines',
+                    value: `Node.JS (API): ${process.version}\n@discord.js: v${version}`,
+                    inline: true,
+                },
+                {
+                    name: 'Avg. Heartbeat',
+                    value: String(client.ws.ping),
+                    inline: true,
+                },
+                {
+                    name: 'Shards',
+                    value: String(client.shard?.count || 1),
+                    inline: true,
+                },
+                {
+                    name: 'Went online',
+                    value: `<t:${Math.floor(onlineSince / 1000)}:R>`,
+                    inline: true,
+                },
+                {
+                    name: 'Servers',
+                    value: String(client.guilds.cache.size),
+                    inline: true,
+                },
+                {
+                    name: 'Users watching',
+                    value: voiceStates.size.toString(),
+                    inline: true,
+                },
+            );
 
-    if (interaction.deferred || interaction.replied) {
-        await interaction.editReply({ embeds: [embed] });
-    } else {
-        await interaction.reply({ embeds: [embed], ephemeral: true });
+        if (interaction.deferred || interaction.replied) {
+            await interaction.editReply({ embeds: [embed] });
+        } else {
+            await interaction.reply({ embeds: [embed], ephemeral: true });
+        }
+    } catch (err) {
+        console.error('Error in stats command:', err);
     }
 };
