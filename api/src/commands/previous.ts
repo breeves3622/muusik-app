@@ -5,6 +5,7 @@ import {
     EmbedBuilder,
 } from 'discord.js';
 import { useHistory } from 'discord-player';
+import { player } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {

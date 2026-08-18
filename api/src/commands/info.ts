@@ -1,10 +1,10 @@
-import { CommandInteraction, version } from 'discord.js';
-import { client, onlineSince, voiceStates } from '..';
+import { CommandInteraction } from 'discord.js';
+import { client, onlineSince, voiceStates } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {
     if (interaction.commandName === 'info') {
-        interaction.reply({
+        await interaction.reply({
             embeds: [
                 {
                     title: `Muusik Information`,
@@ -26,6 +26,7 @@ If you wish to do so, you can donate at my Ko-Fi page: https://ko-fi.com/jxtq`,
                     color: colors.Muusik,
                 },
             ],
+            ephemeral: true,
         });
     }
 };

@@ -1,10 +1,10 @@
 import { CommandInteraction, version } from 'discord.js';
-import { client, onlineSince, voiceStates } from '..';
+import { client, onlineSince, voiceStates } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {
     if (interaction.commandName === 'stats') {
-        interaction.reply({
+        await interaction.reply({
             embeds: [
                 {
                     title: `Muusik Stats`,
@@ -44,6 +44,7 @@ export default async (interaction: CommandInteraction) => {
                     ],
                 },
             ],
+            ephemeral: true,
         });
     }
 };

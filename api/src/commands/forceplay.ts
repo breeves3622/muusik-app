@@ -8,7 +8,7 @@ import {
     EmbedBuilder,
     Embed,
 } from 'discord.js';
-import { player } from '..';
+import { player } from '../instance';
 import { default as fetchSongNamesFromLastFM } from '../utils/fetchSongNamesFromLastFM';
 import { default as playlinks } from '../utils/fetchPlaylinks';
 import axios from 'axios';

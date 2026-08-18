@@ -13,7 +13,7 @@ const ITEMS_PER_PAGE = 8;
 
 export default async (interaction: CommandInteraction) => {
     if (interaction.commandName === 'help') {
-        const commandsFilePath = path.join(__dirname, '../../commands.json');
+        const commandsFilePath = path.join(process.cwd(), 'commands.json');
         const commands: Command[] = JSON.parse(
             fs.readFileSync(commandsFilePath, 'utf8'),
         );
@@ -40,7 +40,7 @@ export default async (interaction: CommandInteraction) => {
                 .setDisabled(totalPages <= 1),
         );
 
-        interaction.reply({
+        await interaction.reply({
             embeds: [
                 {
                     title: `muusik.app Commands`,
@@ -72,7 +72,7 @@ export async function handleHelpCommandPagination(
 
     newPage = Math.max(1, Math.min(newPage, totalPages));
 
-    const commandsFilePath = path.join(__dirname, '../../commands.json');
+    const commandsFilePath = path.join(process.cwd(), 'commands.json');
     const commands: Command[] = JSON.parse(
         fs.readFileSync(commandsFilePath, 'utf8'),
     );

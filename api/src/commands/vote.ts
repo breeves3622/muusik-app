@@ -1,5 +1,5 @@
 import { CommandInteraction, version } from 'discord.js';
-import { client, onlineSince, voiceStates } from '..';
+import { client, onlineSince, voiceStates } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {

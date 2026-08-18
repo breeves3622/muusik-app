@@ -4,7 +4,7 @@ import {
     VoiceBasedChannel,
     EmbedBuilder,
 } from 'discord.js';
-import { player, updates, updatesTimeout } from '..';
+import { player, updates, updatesTimeout } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {

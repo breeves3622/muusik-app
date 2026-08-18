@@ -4,7 +4,7 @@ import {
     GuildMember,
     VoiceBasedChannel,
 } from 'discord.js';
-import { player } from '..';
+import { player } from '../instance';
 import { lyricsExtractor } from '@discord-player/extractor';
 import { colors } from '../types';
 

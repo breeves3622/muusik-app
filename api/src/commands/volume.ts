@@ -12,7 +12,7 @@ import {
     TextInputBuilder,
     TextInputStyle,
 } from 'discord.js';
-import { player } from '..';
+import { player } from '../instance';
 import { colors } from '../types';
 
 export default async (interaction: CommandInteraction) => {

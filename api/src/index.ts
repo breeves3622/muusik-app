@@ -1,10 +1,19 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
-import { ActivityType, Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import { ActivityType, REST, Routes } from 'discord.js';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { Player } from 'discord-player';
+import axios from 'axios';
+import {
+    client,
+    player,
+    voiceStates,
+    updates,
+    updatesTimeout,
+    onlineSince,
+    setOnlineSince,
+} from './instance';
 import * as routeHandlers from './routes/index';
 import { default as interactionManager } from './modules/interactionManager';
 import {
@@ -16,28 +25,18 @@ import {
     playerStart,
     volumeChange,
 } from './player_events';
-import axios from 'axios';
 
-export const client = new Client({
-    intents: [
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
-    ],
-});
+export {
+    client,
+    player,
+    voiceStates,
+    updates,
+    updatesTimeout,
+    onlineSince,
+    setOnlineSince,
+};
 
-export const player = new Player(client);
 player.extractors.loadDefault();
-export const voiceStates = new Map<
-    string,
-    { guild_id: string; channel_id: string }
->();
-export const updates = new Map<
-    string,
-    { track: boolean; volume: boolean; queue: boolean; paused: boolean }
->();
-export const updatesTimeout = new Map<string, NodeJS.Timeout>();
-export let onlineSince: number;
 
 client.on('voiceStateUpdate', async (oldState, newState) => {
     if (newState.member && newState.channelId) {
@@ -62,7 +61,7 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
 
 client.on('ready', async () => {
     console.log(player.scanDeps());
-    onlineSince = Date.now();
+    setOnlineSince(Date.now());
 
     try {
         if (process.env.TOKEN && process.env.CLIENT_ID) {
