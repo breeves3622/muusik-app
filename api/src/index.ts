@@ -1,7 +1,9 @@
 import 'dotenv/config';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
-import { ActivityType, Client, GatewayIntentBits, REST } from 'discord.js';
+import { ActivityType, Client, GatewayIntentBits, REST, Routes } from 'discord.js';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { Player } from 'discord-player';
 import * as routeHandlers from './routes/index';
 import { default as interactionManager } from './modules/interactionManager';
@@ -57,9 +59,6 @@ client.on('voiceStateUpdate', async (oldState, newState) => {
         }
     }
 });
-
-import fs from 'node:fs';
-import path from 'node:path';
 
 client.on('ready', async () => {
     console.log(player.scanDeps());
