@@ -103,6 +103,7 @@ client.on('ready', async () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+    console.log(`[DEBUG] Raw interaction received: type=${interaction.type}, isCommand=${interaction.isCommand()}`);
     await interactionManager.handleInteraction(interaction);
 });
 
