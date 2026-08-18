@@ -3,9 +3,8 @@ import { Player } from 'discord-player';
 
 export const client = new Client({
     intents: [
-        GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildVoiceStates,
     ],
 });
 
