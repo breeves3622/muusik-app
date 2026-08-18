@@ -1,0 +1,20 @@
+{
+    "token": "YOUR_DISCORD_BOT_TOKEN",
+    "client_id": 1539295351675162745,
+    "client_secret": "YOUR_DISCORD_CLIENT_SECRET",
+    "prefix": "v!",
+    "activity": [
+        { "type": "listening", "name": "/play | Music for everyone" }
+    ],
+    "mongo_url": "mongodb://admin:adminpassword123@vocard-db:27017/?authSource=admin",
+    "nodes": {
+        "Node1": {
+            "host": "lavalink",
+            "port": 2333,
+            "password": "youshallnotpass",
+            "secure": false
+        }
+    },
+    "ipc_port": 5000,
+    "embed_color": 10181046
+}
